@@ -77,17 +77,17 @@ class MetaSurface(EmTxRx):
         #
         # self.ABS_1bit_EMPlane = signalWithNoisePlane
 
-    def GetMatePatternMIMO(self):
+    def GetMatePatternMIMO(self, width):
         # 超材料表面场值 EMonMateSurface
         X_matesurface = np.ones([1, self.UnitNum]).T * (self.L_MetaUnit * np.arange(1,self.UnitNum + 1) - self.L_MetaUnit / 2) - self.L_MetaUnit * self.UnitNum / 2
         Y_matesurface = (self.L_MetaUnit * np.arange(1, self.UnitNum + 1).reshape(self.UnitNum,1) - self.L_MetaUnit / 2) * np.ones([1, self.UnitNum]) - self.L_MetaUnit * self.UnitNum / 2
         Z_matesurface = np.zeros([self.UnitNum, self.UnitNum])
         Smn = np.zeros([self.UnitNum, self.UnitNum], dtype=complex)
         Rns = np.sqrt(np.square(self.Xs - X_matesurface) + np.square(self.Ys - Y_matesurface) + np.square(self.Zs))  # 点源距离超材料的距离
-        Rnr1 = np.sqrt(np.square(self.Xr+0.1 - X_matesurface) + np.square(self.Yr+0.1 - Y_matesurface) + np.square(self.Zr))  # 接收机距离超材料的距离
-        Rnr2 = np.sqrt(np.square(self.Xr-0.1 - X_matesurface) + np.square(self.Yr+0.1 - Y_matesurface) + np.square(self.Zr))  # 接收机距离超材料的距离
-        Rnr3 = np.sqrt(np.square(self.Xr+0.1 - X_matesurface) + np.square(self.Yr-0.1 - Y_matesurface) + np.square(self.Zr))  # 接收机距离超材料的距离
-        Rnr4 = np.sqrt(np.square(self.Xr-0.1 - X_matesurface) + np.square(self.Yr-0.1 - Y_matesurface) + np.square(self.Zr))  # 接收机距离超材料的距离
+        Rnr1 = np.sqrt(np.square(self.Xr+width - X_matesurface) + np.square(self.Yr+width - Y_matesurface) + np.square(self.Zr))  # 接收机距离超材料的距离
+        Rnr2 = np.sqrt(np.square(self.Xr-width - X_matesurface) + np.square(self.Yr+width - Y_matesurface) + np.square(self.Zr))  # 接收机距离超材料的距离
+        Rnr3 = np.sqrt(np.square(self.Xr+width - X_matesurface) + np.square(self.Yr-width - Y_matesurface) + np.square(self.Zr))  # 接收机距离超材料的距离
+        Rnr4 = np.sqrt(np.square(self.Xr-width - X_matesurface) + np.square(self.Yr-width - Y_matesurface) + np.square(self.Zr))  # 接收机距离超材料的距离
         # Rnr5 = np.sqrt(np.square(self.Xr - X_matesurface) + np.square(self.Yr - Y_matesurface) + np.square(self.Zr))  # 接收机距离超材料的距离
         Smn = np.multiply(self.E_s * 1 / Rns, np.exp(1j * self.k * Rns) * np.exp(1j * self.Phi_s))
         # def GetMetaPattern(self):
