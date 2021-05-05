@@ -28,7 +28,7 @@ for row in range(numGrid):
             [-1.30, 0, 1.111, row * Resolution - VisionFiled / 2, column * Resolution - VisionFiled / 2,
              2.665])  # 设定源的位置 0.9 X正向西 Y正向北 上北下南左西右东 1.482 2.47-1.1   -1.20 #2.474  2.683-0.95=1.733  2.68-1.582=1.098
         MS = MetaSurface(Location_Channel, UnitNum)
-        MS.GetMatePatternMIMO(0.05)
+        MS.GetMatePatternMIMO(0.1)
         # 串口控制
         Pattern = Engine1.Image2hex(MS.Smn_hat)
         # start = time.time()
@@ -40,8 +40,8 @@ for row in range(numGrid):
 
 print("acquire signal Power took %.3f sec." % (time.time() - start))
 
-mat_path = 'F:/zht/CCC/CCCcloseData/analys/biggerPoint/2442centerMIMO_0.05.mat'
-io.savemat(mat_path, {'MIMO005': PowerMap})
+mat_path = 'F:/zht/CCC/CCCcloseData/analys/biggerPoint/2442centerMIMO5_0.1.mat'
+io.savemat(mat_path, {'MIMO5p01': PowerMap})
 
 
 fig, (ax0, ax1) = plt.subplots(1, 2)
