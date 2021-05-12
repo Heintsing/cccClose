@@ -48,7 +48,7 @@ Smn_hat_record = np.append(Smn_hat_record, [Smn_hat], axis=0)
 
 powerTemp = GetPower(streamer, args, chan)
 power_max = powerTemp.copy()
-print(power_max, 'dbm')
+print('刚开超材料功率', power_max, 'dbm')
 fig, (ax0, ax1) = plt.subplots(1, 2)
 
 for num in range(1, 25):
@@ -83,10 +83,20 @@ for echo in range(1, 4):
         # try:
         start = time.time()
 
-        # 在原编码的基础上 随机改变10%的bit
+        # # 在原编码的基础上 随机改变10%的bit
+        # if num != 1:
+        #     index = np.random.randint(UnitNum * UnitNum, size=9)
+        #     Smn_hat_temp[index // UnitNum, index % UnitNum] = (Smn_hat_temp[index // UnitNum, index % UnitNum] == False)
+
         if num != 1:
-            index = np.random.randint(UnitNum * UnitNum, size=9)
-            Smn_hat_temp[index // UnitNum, index % UnitNum] = (Smn_hat_temp[index // UnitNum, index % UnitNum] == False)
+            index = np.random.randint((UnitNum-2) * (UnitNum-2))
+            # row = np.arange(index // UnitNum-1, index // UnitNum+2)
+            # column = np.arange(index % UnitNum-1, index % UnitNum+2)
+            row = index // (UnitNum-2)+1
+            column = index % (UnitNum-2)+1
+            Smn_hat_temp[row-1:row+2, column-1:column+2] = (Smn_hat_temp[row-1:row+2, column-1:column+2] == False)
+
+
         # Smn_hat_temp[index // UnitNum, index % UnitNum] = ~Smn_hat_temp[index // UnitNum, index % UnitNum]
         Pattern = Engine1.Image2hex(Smn_hat_temp)
         Engine1.MetaDeploy(Pattern)
