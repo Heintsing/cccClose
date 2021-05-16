@@ -43,7 +43,7 @@ usrp, streamer, args, chan = SetUsrp()
 template = cv2.imread('PKU.png', 0)
 tcp_socket = TcpConnect()
 
-Communication.Print_Used_Com()
+# Communication.Print_Used_Com()
 Engine1 = Communication(com, 115200, 0.5)
 Engine1.Print_Name()
 t = []

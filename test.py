@@ -36,3 +36,17 @@
 #         print("Ctrl+C pressed")
 #         camera.stop_recording()
 #         break
+
+from SerialPort import *
+com1 = 'COM3'
+com2 = 'COM6'
+UnitNum = 24
+Engine1 = Communication(com1, 115200, 0.5)
+Engine2 = Communication(com2, 115200, 0.5)
+Smn_hat_tempt = np.ones([UnitNum, UnitNum])
+Smn_hat_tempt1 = np.zeros([UnitNum, UnitNum])
+Pattern1 = Engine1.Image2hex(Smn_hat_tempt)
+Pattern2 = Engine1.Image2hex(Smn_hat_tempt1)
+
+Engine1.MetaDeploy(Pattern2)
+Engine2.MetaDeploy(Pattern2)
