@@ -8,8 +8,8 @@ import time
 
 com = 'COM6'
 UnitNum = 24
-Resolution = 0.1  # 0.1m
-VisionFiled = 4  # 1m的方形范围
+Resolution = 0.05  # 0.1m
+VisionFiled = 4 # 1m的方形范围
 numGrid = int(VisionFiled / Resolution)
 PowerMap = np.zeros([numGrid, numGrid])
 Location_Channel = np.array([0, 0, 2.654, -2.8, 0, 2.654])  #  -1.30, 0, 1.111
@@ -29,7 +29,8 @@ for row in range(numGrid):
             [Location_Channel[0], Location_Channel[1], Location_Channel[2], row * Resolution - VisionFiled / 2+2.8, column * Resolution - VisionFiled / 2,
              2.665])  # 设定源的位置 0.9 X正向西 Y正向北 上北下南左西右东 1.482 2.47-1.1   -1.20 #2.474  2.683-0.95=1.733  2.68-1.582=1.098
         MS = MetaSurface(Location_Channel, UnitNum)
-        MS.GetMatePatternMIMO(0.1)
+        # MS.GetMatePatternMIMO(0.1) #扩大聚焦点
+        MS.GetMatePattern()
         # 串口控制
         Pattern = Engine1.Image2hex(MS.Smn_hat)
         # start = time.time()
@@ -41,8 +42,8 @@ for row in range(numGrid):
 
 print("acquire signal Power took %.3f sec." % (time.time() - start))
 
-mat_path = 'F:/zht/CCC/CCCcloseData/analys/biggerPoint/2442center_inside.mat'
-io.savemat(mat_path, {'inside': PowerMap})
+mat_path = 'F:/zht/CCC/CCCcloseData/analys/through_wall_Position_Cal/2442_outside4.mat'
+io.savemat(mat_path, {'Outside1': PowerMap})
 
 
 fig, (ax0, ax1) = plt.subplots(1, 2)
