@@ -7,12 +7,12 @@ from matplotlib import pyplot as plt
 import scipy.io as scio
 import time
 import random
-from depth_sensing import *
-from FLANN2 import *
+# from depth_sensing import *
+# from FLANN2 import *
 
 Location_Channel = np.array([0, 0, 2.654, -2.8, 0, 2.654])  # 设定源的位置 0.9 X正向西 Y正向北 上北下南左西右东 1.482 2.47-1.1
 com1 = 'COM3'
-com2 = 'COM6'
+com2 = 'COM5'
 UnitNum = 24
 
 # 初始化各个模块-----------------------
@@ -31,15 +31,15 @@ PowerMax = []
 PowerMax_static = []
 PowerPath_static = []
 num = 0
-template = cv2.imread('PKU.png', 0)
-Posipre = [[1104, 621]]
+# template = cv2.imread('PKU.png', 0)
+# Posipre = [[1104, 621]]
 Smn_hat_record = np.zeros([1, UnitNum, UnitNum])  # 初始化为0
 
 # 初始化Pattern 使用解析聚焦算法
-trans, Posipre = FLANN(zed, template, Posipre)  # 3.快速临近点匹配
-Location_Channel[3] = trans[0] - 0.7  # 0.862
-Location_Channel[4] = trans[1]
-Location_Channel[5] = -trans[2]
+# trans, Posipre = FLANN(zed, template, Posipre)  # 3.快速临近点匹配
+# Location_Channel[3] = trans[0] - 0.7  # 0.862
+# Location_Channel[4] = trans[1]
+# Location_Channel[5] = -trans[2]
 MS = MetaSurface(Location_Channel, UnitNum)
 MS.GetMatePattern()
 # Smn_hat_temp = np.ones([UnitNum, UnitNum]) #初始化为0

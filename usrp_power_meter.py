@@ -19,7 +19,7 @@ def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument("-a", "--args", default="",  # ip=192.168.10.3
                         help="USRP Device Args")
-    parser.add_argument("-f", "--freq", type=float, default=2412000000,  # required=True,
+    parser.add_argument("-f", "--freq", type=float, default=2442000000,  # required=True,
                         help="Center Frequency")
     parser.add_argument("-o", "--lo-offset", type=float, default=0.0,
                         help="Optional LO offset")
@@ -183,7 +183,7 @@ def SetUsrp():
     args.freq = 2442000000
     args.lo_offset = 0.0
     args.channel = [0]
-    args.antenna = 'TX/RX'
+    args.antenna = 'RX2'  #TX/RX
     args.bandwidth = None
     args.ref_level = -15
     args.samps_per_est = 1000

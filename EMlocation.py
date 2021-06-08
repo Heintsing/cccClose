@@ -6,7 +6,7 @@ from matplotlib import pyplot as plt
 import scipy.io as io
 import time
 
-com = 'COM6'
+com = 'COM5'
 UnitNum = 24
 Resolution = 0.05  # 0.1m
 VisionFiled = 4 # 1m的方形范围
@@ -42,7 +42,8 @@ for row in range(numGrid):
 
 print("acquire signal Power took %.3f sec." % (time.time() - start))
 
-mat_path = 'F:/zht/CCC/CCCcloseData/analys/through_wall_Position_Cal/2442_outside4.mat'
+# mat_path = 'F:/zht/CCC/CCCcloseData/analys/through_wall_Position_Cal/2442_outside4.mat'
+mat_path = 'C:/Users/admin/Desktop/CCC_laptop/RobotLocation/2442_outside2.mat'
 io.savemat(mat_path, {'Outside1': PowerMap})
 
 

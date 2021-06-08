@@ -64,24 +64,39 @@ import numpy as np
 import numpy as np
 from matplotlib import pyplot as plt
 
-x = np.arange(1, 11)
-y = 2 * x + 5
+# x = np.arange(1, 11)
+# y = 2 * x + 5
+#
+# Posi = np.zeros([1, 3])
+# Posi = np.append(Posi, [[1, 1, 1]], axis=0)
+# a = [1, 1, 1]
+# a = np.array(a).reshape(-1, 3)
+# Posi = np.append(Posi, a, axis=0)
+#
+# plt.title("Matplotlib demo")
+# plt.xlabel("x axis caption")
+# plt.ylabel("y axis caption")
+# plt.plot(Posi, "ob")
+#
+#
+# plt.show()
+#
+#
+#
+# for i in range(1,10):
+#     print(i)
 
-Posi = np.zeros([1, 3])
-Posi = np.append(Posi, [[1, 1, 1]], axis=0)
-a = [1, 1, 1]
-a = np.array(a).reshape(-1, 3)
-Posi = np.append(Posi, a, axis=0)
 
-plt.title("Matplotlib demo")
-plt.xlabel("x axis caption")
-plt.ylabel("y axis caption")
-plt.plot(Posi, "ob")
+import numpy as np
 
+mat = np.array([[1, 3, 5],
 
-plt.show()
+                [2, 4, 6],
 
+                [7, 8, 9]
 
+                ])
+print(mat, "# orignal")
+mat90 = np.rot90(mat, -1)
 
-for i in range(1,10):
-    print(i)
+print(mat90, "# rorate 90 anti-clockwise")

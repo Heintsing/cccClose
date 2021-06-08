@@ -37,6 +37,7 @@ class MetaSurface(EmTxRx):
         # 超材料单元大小
         self.L_MetaUnit = 0.054
         self.UnitNum = UnitNum  # 超材料单元边长数目
+        self.UnitNumY = 32  # 超材料单元边长数目
         # 聚焦平面属性
         self.ReceivePlaneL = 2
         self.N_Cell_RecPlan = 100
@@ -76,6 +77,18 @@ class MetaSurface(EmTxRx):
         #         signal[a, b] = signal_ab
         #
         # self.ABS_1bit_EMPlane = signalWithNoisePlane
+    def GetMatePattern34(self):
+        # 超材料表面场值 EMonMateSurface
+        X_matesurface = np.ones([1, self.UnitNumY]).T * (self.L_MetaUnit * np.arange(1, self.UnitNum + 1) - self.L_MetaUnit / 2) - self.L_MetaUnit * self.UnitNum / 2
+        Y_matesurface = (self.L_MetaUnit * np.arange(1, self.UnitNumY + 1).reshape(self.UnitNumY, 1) - self.L_MetaUnit / 2) * np.ones([1, self.UnitNum]) - self.L_MetaUnit * self.UnitNumY / 2
+        Z_matesurface = np.zeros([self.UnitNum, self.UnitNum])
+        Smn = np.zeros([self.UnitNum, self.UnitNum], dtype=complex)
+        Rns = np.sqrt(np.square(self.Xs - X_matesurface) + np.square(self.Ys - Y_matesurface) + np.square(self.Zs))  # 点源距离超材料的距离
+        Rnr = np.sqrt(np.square(self.Xr - X_matesurface) + np.square(self.Yr - Y_matesurface) + np.square(self.Zr))  # 接收机距离超材料的距离
+        Smn = np.multiply(self.E_s * 1 / Rns, np.exp(1j * self.k * Rns) * np.exp(1j * self.Phi_s))
+        # def GetMetaPattern(self):
+        # 量化
+        self.Smn_hat = np.sign(np.cos(self.k * Rns + self.k * Rnr + self.Phi_s))
 
     def GetMatePatternMIMO(self, width):
         # 超材料表面场值 EMonMateSurface

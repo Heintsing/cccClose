@@ -112,7 +112,7 @@ class Communication():
     def Image2hex(self, M):
         M = (M + 1) / 2
         # M = M.T
-        M=np.flip(M, axis=1)
+        M = np.flip(M, axis=1)
         M = np.concatenate((np.ones([8, 24]), M))
         # M = np.concatenate((M, np.ones([8, 24])))
         MM = np.concatenate((M[..., 0:8], M[..., 8:16], M[..., 16:24], M[..., 24:32]), axis=1).T
@@ -135,20 +135,81 @@ class Communication():
             Pattern.append(b)
 
         return Pattern
-    def MetaDeploy(self,Pattern):
+
+    def Image2hex34(self, M):
+        # 3*4超材料因为极化设置原因需要对每个8*8矩阵进行右旋九十度
+        # M = (M + 1) / 2
+        # M = M.T
+        # M = np.flip(M, axis=0)
+        # M = np.concatenate((np.ones([8, 24]), M))
+        # M = np.concatenate((M, np.ones([8, 24])))
+        MM = np.concatenate((M[..., 0:8], M[..., 8:16], M[..., 16:24], M[..., 24:32]), axis=1).T
+        MM[0:8, 0:8] = np.rot90(MM[0:8, 0:8], -1)
+        MM[0:8, 8:16] = np.rot90(MM[0:8, 8:16], -1)
+        MM[0:8, 16:24] = np.rot90(MM[0:8, 16:24], -1)
+        MM[0:8, 24:32] = np.rot90(MM[0:8, 24:32], -1)
+        MM[8:16, 0:8] = np.rot90(MM[8:16, 0:8], -1)
+        MM[8:16, 8:16] = np.rot90(MM[8:16, 8:16], -1)
+        MM[8:16, 16:24] = np.rot90(MM[8:16, 16:24], -1)
+        MM[8:16, 24:32] = np.rot90(MM[8:16, 24:32], -1)
+        MM[16:24, 0:8] = np.rot90(MM[16:24, 0:8], -1)
+        MM[16:24, 8:16] = np.rot90(MM[16:24, 8:16], -1)
+        MM[16:24, 16:24] = np.rot90(MM[16:24, 16:24], -1)
+        MM[16:24, 24:32] = np.rot90(MM[16:24, 24:32], -1)
+        # M = M.T
+        # M = M.reshape(8, 8, 12)
+        # MM = np.ones([96, 8], dtype=int)
+        M = MM.reshape(96, 8).astype(np.int32)
+        str1 = str(M)
+        str1 = str1.replace('\n', '')
+        str1 = str1.replace('[', '')
+        # str1 = str1.replace(']', '')
+        str1 = str1.replace(' ', '')
+        str1 = str1.split(']')
+        str1 = str1[0:96]
+        Pattern = []
+        for ii in range(0, int(str1.__len__())):
+            CodeDec = str(int(str1[ii], 2))
+            b = hex(int(CodeDec)).replace('0x', '')  # 16
+            b = '{:0>2x}'.format(int(CodeDec))
+            Pattern.append(b)
+
+        return Pattern
+
+    def MetaDeploy(self, Pattern):
         # self.Send_data(chr(255).encode("utf-8"))
         headers = '7e 00'  # bytes.fromhex('7e 00')
         # tile = bytes.fromhex('7e')
         PatternEnd = Pattern.copy()
         PatternEnd[95] = '7e'
         Peroid = '7e ff ff' + ' ' + ' '.join(PatternEnd)  # bytes.fromhex('7e ff ff'+' '+' '.join(PatternEnd))
-        PatternBit = headers+' '+' '.join(Pattern)+' '+'7e'+' '+Peroid
+        PatternBit = headers + ' ' + ' '.join(Pattern) + ' ' + '7e' + ' ' + Peroid
 
         # print(PatternBit[79])
         a = bytes.fromhex(PatternBit)
         # print(PatternBit)
 
         self.Send_data(bytes.fromhex(PatternBit))
+
+    def MetaDeployMultiPattern(self, Pattern, n):
+        # self.Send_data(chr(255).encode("utf-8"))
+        # CodeDec = str(int(str(n), 2))
+        b = '{:0>2x}'.format(int(n))
+        headers = '7e ' + b  # bytes.fromhex('7e 00')
+
+        # tile = bytes.fromhex('7e')
+        PatternEnd = Pattern.copy()
+        PatternEnd[95] = '7e'
+        Peroid = '7e ff ff' + ' ' + ' '.join(PatternEnd)  # bytes.fromhex('7e ff ff'+' '+' '.join(PatternEnd))
+        PatternBit = headers + ' ' + ' '.join(Pattern) + ' ' + '7e' + ' ' + Peroid
+
+        # print(PatternBit[79])
+        a = bytes.fromhex(PatternBit)
+        # print(PatternBit)
+        return bytes.fromhex(PatternBit)
+
+        # self.Send_data(bytes.fromhex(PatternBit))
+
 
 if __name__ == "__main__":
     Communication.Print_Used_Com()
@@ -163,13 +224,13 @@ if __name__ == "__main__":
     # b.encode('ascii')
     # Engine1.Send_data(b.encode('ascii'))
     # Engine1.Send_data(chr(255).encode("utf-8"))
-    Pattern = Engine1.Image2hex(np.ones([24,24]))
+    Pattern = Engine1.Image2hex(np.ones([24, 24]))
     headers = '7e 00'  # bytes.fromhex('7e 00')
     # tile = bytes.fromhex('7e')
     PatternEnd = Pattern.copy()
     PatternEnd[95] = '7e'
-    Peroid = '7e ff ff'+' '+' '.join(PatternEnd)  # bytes.fromhex('7e ff ff'+' '+' '.join(PatternEnd))
-    PatternBit = headers+' '+' '.join(Pattern)+' '+'7e'+' '+Peroid
+    Peroid = '7e ff ff' + ' ' + ' '.join(PatternEnd)  # bytes.fromhex('7e ff ff'+' '+' '.join(PatternEnd))
+    PatternBit = headers + ' ' + ' '.join(Pattern) + ' ' + '7e' + ' ' + Peroid
 
     # d = bytes.fromhex('ff')
     Engine1.Send_data(bytes.fromhex(PatternBit))
