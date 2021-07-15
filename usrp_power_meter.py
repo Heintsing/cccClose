@@ -23,9 +23,9 @@ def parse_args():
                         help="Center Frequency")
     parser.add_argument("-o", "--lo-offset", type=float, default=0.0,
                         help="Optional LO offset")
-    parser.add_argument("-c", "--channel", type=int, default=[0],
+    parser.add_argument("-c", "--channel", type=int, default=[0,1],
                         help="USRP RX Channel Index")
-    parser.add_argument("-t", "--antenna", default='TX/RX',
+    parser.add_argument("-t", "--antenna", default='RX2',  #'TX/RX',
                         help="USRP RX Antenna")
     parser.add_argument("-r", "--rate", default=1e6, type=float,
                         help="Sampling Rate")
@@ -182,8 +182,8 @@ def SetUsrp():
     args.args = 'ip=192.168.10.2'
     args.freq = 2442000000
     args.lo_offset = 0.0
-    args.channel = [0]
-    args.antenna = 'RX2'  #TX/RX
+    args.channel = [0,1]
+    args.antenna =  'TX/RX'#'RX2'
     args.bandwidth = None
     args.ref_level = -15
     args.samps_per_est = 1000
@@ -191,6 +191,7 @@ def SetUsrp():
     args.rate = 1000000
 
     usrp = uhd.usrp.MultiUSRP(args.args)
+    uhd.usrp.SubdevSpec("A:0 B:1")
     (chan, ref_level) = setup_device(usrp, args)
     streamer = get_streamer(usrp, args.channel[0])
 
@@ -220,11 +221,11 @@ def main():
     args = parse_args()
     print(args)
     usrp = uhd.usrp.MultiUSRP(args.args)
-    # uhd.usrp.SubdevSpec("A:0 B:1")
+    uhd.usrp.SubdevSpec("A:0 B:1")
     (chan, ref_level) = setup_device(usrp, args)
     setup_device2(usrp, args)
 
-    streamer = get_streamer(usrp, args.channel[0])
+    streamer = get_streamer(usrp, args.channel[1])
     if args.mode == 'continuous':
         def handle_sigint(_sig, _frame):
             print("Caught Ctrl-C, exiting...")

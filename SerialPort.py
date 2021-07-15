@@ -143,7 +143,8 @@ class Communication():
         # M = np.flip(M, axis=0)
         # M = np.concatenate((np.ones([8, 24]), M))
         # M = np.concatenate((M, np.ones([8, 24])))
-        MM = np.concatenate((M[..., 0:8], M[..., 8:16], M[..., 16:24], M[..., 24:32]), axis=1).T
+        # MM = np.concatenate((M[..., 0:8], M[..., 8:16], M[..., 16:24], M[..., 24:32]), axis=1).T
+        MM = np.copy(M.T)
         MM[0:8, 0:8] = np.rot90(MM[0:8, 0:8], -1)
         MM[0:8, 8:16] = np.rot90(MM[0:8, 8:16], -1)
         MM[0:8, 16:24] = np.rot90(MM[0:8, 16:24], -1)

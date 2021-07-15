@@ -6,13 +6,15 @@ from matplotlib import pyplot as plt
 import scipy.io as io
 import time
 
-com = 'COM5'
+com = 'COM4'
 UnitNum = 24
-Resolution = 0.05  # 0.1m
-VisionFiled = 4 # 1m的方形范围
+Resolution = 0.25  # 0.1m
+VisionFiled = 5 # 1m的方形范围
+VisionFiledX = 5 # 1m的方形范围
 numGrid = int(VisionFiled / Resolution)
-PowerMap = np.zeros([numGrid, numGrid])
-Location_Channel = np.array([0, 0, 2.654, -2.8, 0, 2.654])  #  -1.30, 0, 1.111
+numGridY = int(VisionFiledX / Resolution)
+PowerMap = np.zeros([numGrid, numGridY])
+Location_Channel = np.array([1.3, 0.16, 2.237, -2.8, 0, 2.654])  #  -1.30, 0, 1.111
 
 usrp, streamer, args, chan = SetUsrp()
 Communication.Print_Used_Com()
@@ -23,7 +25,7 @@ start = time.time()
 row = 0
 column = 0
 for row in range(numGrid):
-    for column in range(numGrid):
+    for column in range(numGridY):
         # 优化波束指向
         Location_Channel = np.array(
             [Location_Channel[0], Location_Channel[1], Location_Channel[2], row * Resolution - VisionFiled / 2+2.8, column * Resolution - VisionFiled / 2,
