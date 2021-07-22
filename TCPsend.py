@@ -5,8 +5,8 @@ def TcpConnect():
     tcp_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     # 2. 链接服务器
     # tcp_socket.connect(("192.168.33.11", 7890))
-    server_ip =  '192.168.1.100' #input("请输入要链接的服务器的ip:")
-    server_port = 10500 #int(input("请输入要链接的服务器的port:"))  7890
+    server_ip = '192.168.3.44' #input("请输入要链接的服务器的ip:")
+    server_port = 7890 #int(input("请输入要链接的服务器的port:"))  7890
     server_addr = (server_ip, server_port)
     tcp_socket.connect(server_addr)
     return tcp_socket

@@ -109,7 +109,7 @@ class Communication():
             except Exception as e:
                 print("异常报错：", e)
 
-    def Image2hex(self, M):
+    def Image2hex(self, M):  # 适配超材料的标准为3*4 24*32
         M = (M + 1) / 2
         # M = M.T
         M = np.flip(M, axis=1)

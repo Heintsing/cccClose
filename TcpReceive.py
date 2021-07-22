@@ -6,7 +6,7 @@ def main():
     tcp_server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
     # 2. 插入手机卡(绑定本地信息 bind)
-    tcp_server_socket.bind(("", 7890))
+    tcp_server_socket.bind(("", 1792))
 
     # 3. 将手机设置为正常的 响铃模式(让默认的套接字由主动变为被动 listen)
     tcp_server_socket.listen(128)

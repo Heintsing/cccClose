@@ -50,6 +50,43 @@
 #
 # Engine1.MetaDeploy(Pattern2)
 # Engine2.MetaDeploy(Pattern2)
+#
+# for num in range(0,101,2):
+#     print(num)
+from Seeker_SDK_Client import *
 
-for num in range(0,101,2):
-    print(num)
+# SetVerbosityLevel(4)
+# SetErrorMsgHandlerFunc(py_msg_func)
+print("Begin to init the SDK Client")
+ret = Initialize(b"10.1.1.198", b"10.1.1.198")
+
+
+# 获取天线位置
+def getATposi():
+    x_at = 0
+    y_at = 0
+    z_at = 0
+    b = 1
+
+    data = GetCurrentFrame()
+    frameData = data.contents
+    pBody = pointer(frameData.BodyData[0])
+
+    x_at = pBody.contents.Markers[0][0]
+    y_at = pBody.contents.Markers[0][1]
+    z_at = pBody.contents.Markers[0][2]
+
+    print('x', x_at, 'y', y_at, 'z', z_at)
+    return x_at, y_at, z_at
+
+def getSinglePoint():
+    data = GetCurrentFrame()
+    print("nUnidentifiedMarkers = %d" % data.contents.nUnidentifiedMarkers)
+    x = data.contents.UnidentifiedMarkers[0][0]
+    y = data.contents.UnidentifiedMarkers[0][1]
+    z = data.contents.UnidentifiedMarkers[0][2]
+
+    print('x', x, 'y', y, 'z', z)
+    return x, y, z
+
+(x,y,z) = getSinglePoint()

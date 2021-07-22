@@ -179,7 +179,7 @@ def handle_sigint(_sig, _frame):
 
 def SetUsrp():
     args = argparse.Namespace()
-    args.args = 'ip=192.168.10.2'
+    args.args = 'ip=10.1.1.2'#'ip=192.168.10.2'
     args.freq = 2442000000
     args.lo_offset = 0.0
     args.channel = [0,1]
