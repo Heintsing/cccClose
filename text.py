@@ -89,14 +89,17 @@ from matplotlib import pyplot as plt
 
 import numpy as np
 
-mat = np.array([[1, 3, 5],
-
-                [2, 4, 6],
-
-                [7, 8, 9]
-
-                ])
-print(mat, "# orignal")
-mat90 = np.rot90(mat, -1)
-
-print(mat90, "# rorate 90 anti-clockwise")
+# mat = np.array([[1, 3, 5],
+#
+#                 [2, 4, 6],
+#
+#                 [7, 8, 9]
+#
+#                 ])
+# print(mat, "# orignal")
+# mat90 = np.rot90(mat, -1)
+#
+# print(mat90, "# rorate 90 anti-clockwise")
+Smn_hat_tempt_stand_all_on = np.ones([32, 24])
+Smn_hat_tempt_stand_all_on[:, 0:24:4] = 0
+print(Smn_hat_tempt_stand_all_on)

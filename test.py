@@ -89,4 +89,5 @@ def getSinglePoint():
     print('x', x, 'y', y, 'z', z)
     return x, y, z
 
-(x,y,z) = getSinglePoint()
+# (x,y,z) = getSinglePoint()
+(x,y,z) = getATposi()

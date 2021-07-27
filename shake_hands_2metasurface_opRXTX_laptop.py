@@ -121,7 +121,7 @@ for echo in range(1, 2):
     PowerMax = []
     # 不使用双聚焦，吊顶超材料仅用作后续优化 需要调整两个地方
     Pattern_stand = Engine2.Image2hex34(Smn_hat_temp_stand)
-    Pattern_up = Engine1.Image2hex(Smn_hat_temp_up)  # mark1
+    Pattern_up = Engine1.Image2hex(Smn_hat_tempt_up_all_off)  # mark1
     Engine1.MetaDeploy(Pattern_up)
     Engine2.MetaDeploy(Pattern_stand)
     power_max = GetPower(streamer, args, chan)
@@ -167,8 +167,8 @@ for echo in range(1, 2):
     start = time.time()
     # Smn_hat_temp = np.ones([UnitNumY, UnitNum]) #
 
-    # Smn_hat_temp_up = Smn_hat_tempt_up_all_off.copy()
-    # Smn_hat_up = Smn_hat_temp_up.copy() # 迭代需要，否则会报错和设为初始值   # mark2
+    Smn_hat_temp_up = Smn_hat_tempt_up_all_off.copy()
+    Smn_hat_up = Smn_hat_temp_up.copy() # 迭代需要，否则会报错和设为初始值   # mark2
     power_last = GetPower(streamer, args, chan)
     n_up_pattern_true = 0
     for num in range(1, n_switch):
@@ -220,14 +220,19 @@ Pattern_up = Engine1.Image2hex(Smn_hat_up)
 Pattern_stand = Engine2.Image2hex34(Smn_hat_stand)
 Bit_up = Engine1.MetaDeployMultiPattern(Pattern_up, 0)
 Bit_stand = Engine1.MetaDeployMultiPattern(Pattern_stand, 0)
-fo = open("2424联合在线优化编码_位置高20210707.txt", "wb")
+fo = open("2424联合在线优化编码_10210727位置1.txt", "wb")
 print("文件名为: ", fo.name)
 str = "菜鸟教程"
 fo.write(Bit_up)
-fo = open("3224联合在线优化编码_位置高20210707.txt", "wb")
+fo = open("3224联合在线优化编码_10210727位置1.txt", "wb")
 print("文件名为: ", fo.name)
 str = "菜鸟教程"
 fo.write(Bit_stand)
+fo = open("位置信息", "wb")
+print("文件名为: ", fo.name)
+str = "菜鸟教程"
+fo.write(Location_Channel)
+fo.write(Location_Channel_up)
 
 fig, ax = plt.subplots(2, 3)
 # 设置字体为楷体
