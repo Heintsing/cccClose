@@ -21,7 +21,7 @@ def py_msg_func(iLogLevel, szLogMessage):
     print("[%s] %s" % (szLevel, cast(szLogMessage, c_char_p).value))
 
 
-def py_data_func(data,b):
+def py_data_func(data):
     if data == None:
         print("Not get the data frame.\n")
         pass
@@ -86,6 +86,7 @@ def py_data_func(data,b):
         Exit()
         return z_at
 
+
 # 获取天线位置
 def getATposi():
     x_at = 0
@@ -94,7 +95,32 @@ def getATposi():
     b = 1
 
     data = GetCurrentFrame()
+    while (data != None):
+        try:
+            data = GetCurrentFrame()
+            frameData = data.contents
+            # print(data)
+            break
+        except:
+            print('null error')
     frameData = data.contents
+    pBody = pointer(frameData.BodyData[0])
+    while (pBody.contents.Markers[0][0] == 9999999.0):
+        print('data.contents',data.contents)
+        data = GetCurrentFrame()
+        while (data != None):
+            try:
+                data = GetCurrentFrame()
+                frameData = data.contents
+                # print(data)
+                break
+            except:
+                print('null error')
+        frameData = data.contents
+        pBody = pointer(frameData.BodyData[0])
+    # frameData = data.fr
+    frameData = data.contents
+    # print(frameData)
     pBody = pointer(frameData.BodyData[0])
 
     x_at = pBody.contents.Markers[0][0]
@@ -102,7 +128,8 @@ def getATposi():
     z_at = pBody.contents.Markers[0][2]
 
     print('x', x_at, 'y', y_at, 'z', z_at)
-    return x_at,y_at,z_at
+    return x_at, y_at, z_at
+
 
 # 获取一个点的位置，SDK中确定没有其他点
 def getSinglePoint():

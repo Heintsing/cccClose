@@ -64,6 +64,24 @@ for num in range(1, 25):  ##测量stand聚焦状态下的信号值
     recv_data = tcpHandle.recv(1024)
     print('receive on', recv_data)
 
+while(1):
+    (x_at, y_at, z_at) = getATposi()
+    Location_Channel_stand = np.array([1302.93, 1296.55 - 1146, -282.26 + 2500, -y_at, z_at - 1146, x_at + 2500]) / 1000  # -y_at,z_at -1146,x_at+2500  # -1.4 X正向北 Y正向上 # x_at, -y_at, 2654-z_at
+    MSstand = MetaSurface(Location_Channel_stand, UnitNum)
+    MSstand.GetMatePattern34()
+    Smn_hat_temp_stand = (MSstand.Smn_hat.copy() + 1) / 2  # 32*24 聚焦
+    # 部署编码
+    Pattern_hex = Image2hex34TCPMod2(Smn_hat_temp_stand)
+    OnPatternMod2onTime(Pattern_hex, tcpHandle)
+    # 测量功率
+    power = GetPower(streamer, args, chan)
+    PowerMax_static = np.append(PowerMax_static, power)
+    PowerPath_static = np.append(PowerPath_static, power)
+
+    recv_data = tcpHandle.recv(1024)
+    print('receive on', recv_data)
+    time.sleep(0.02)
+
 fig, ax = plt.subplots(1, 2)
 c = ax[0].plot(PowerPath_static, '-r')
 ax[0].set_title("whole journey power")

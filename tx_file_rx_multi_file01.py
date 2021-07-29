@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt
 
 global logger
 logger = logging.getLogger(__name__)
-INIT_DELAY = 0.008  # 50mS initial delay before transmit
+INIT_DELAY = 0.01  # 50mS initial delay before transmit
 numm = 200
 
 def rx_multi_file(args, rx_streamer, md, stream_cmd, buffs, result, numm, timer_elapsed_event):
@@ -100,7 +100,7 @@ waveforms = {
 def parse_args():
     """Parse the command line arguments"""
     parser = argparse.ArgumentParser()
-    parser.add_argument("-a", "--args", default="addr=192.168.10.3",  # ip=192.168.10.3
+    parser.add_argument("-a", "--args", default="addr=10.1.1.2",  # ip=192.168.10.3
                         help="USRP Dev56    0i1ce Args")
     parser.add_argument("-f", "--freq", type=float, default=2442000000,  # required=True,
                         help="Center Frequency")
@@ -125,13 +125,13 @@ def parse_args():
                         help="Transmit power (if USRP supports it)")
     parser.add_argument("--ref", type=str, default='internal',
                         help="reference source (internal, external, mimo).")
-    parser.add_argument("--bw", default=0, type=float,
+    parser.add_argument("--bw", default=1000000, type=float,
                         help="analog frontend filter bandwidth in Hz")
     parser.add_argument("--wirefmt", type=str, default='sc16',
                         help="wire format (sc8 or sc16)")
     parser.add_argument("--cpu", type=str, default="fc32",
                         help="specify the host/cpu sample mode for TX")
-    parser.add_argument("-o", "--output-file", type=str, default='E:/image3d/py_usrp/test.fc32')
+    parser.add_argument("-o", "--output-file", type=str, default=r'C:\Users\admin\Desktop\CCC_laptop\Pycode\out.fc32')
     parser.add_argument("-n", "--numpy", default=False, action="store_true",
                         help="Save output file in NumPy format (default: No)")
     parser.add_argument("--seconds_in_future", type=float, default=1.5,
@@ -268,7 +268,7 @@ elif args.rx_sync == "mimo":
     time.sleep(0.1)
 print("Are the times across all motherboards synchronized: ", usrp.get_time_synchronized())
 
-filename = r'E:\image3d\py_usrp\LFMs1000.mat'
+filename = r'C:\Users\admin\Desktop\CCC_laptop\Pycode\LFMs1000.mat'
 tx_buff = load_from_file(filename, args.total_num_samps)
 
 # tx_buff = np.array(
