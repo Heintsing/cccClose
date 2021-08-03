@@ -7,7 +7,7 @@ from focus import *
 import numpy as np
 from matplotlib import pyplot as plt
 
-
+# TCP接口相关
 def TcpConnect():
     # 1. 创建tcp的套接字
     tcp_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -38,7 +38,7 @@ def TcpsReceive(tcp_socket):
     print(recv_data)
 
 
-# 复位指令--------------------------------------------------------------------------------------------
+# 模式一复位指令--------------------------------------------------------------------------------------------
 def OnReset():
     global tcp_socket
     lnSendLen = 20
@@ -249,7 +249,7 @@ def Onstart():
         btStartCmdBuf = btStartCmdBuf + ' ' + a + ' ' + '00 00 00 00 5B 5B 5B 5B 00 00 00 00'
         print(btStartCmdBuf)
         tcp_socket.send(bytes.fromhex(btStartCmdBuf))
-
+# pattern2bit转换函数--------------------------------------------------------------------------------------------
 # 3*3版本 模式1
 def Image2hexTCP(M):  # 适配超材料的标准为3*3 24*32
     M = (M + 1) / 2
@@ -281,8 +281,9 @@ def Image2hexTCP(M):  # 适配超材料的标准为3*3 24*32
 
     return Pattern96128
 
+
 # 3*3版本 模式2
-def Image2hex33TCPMod2(M):  # 适配超材料的标准为3*3 24*32
+def Image2hexTCPMod2(M):  # 适配超材料的标准为3*3 24*32
     M = (M + 1) / 2
     # M = M.T
     M = np.flip(M, axis=1)
@@ -339,9 +340,11 @@ def Image2hex33TCPMod2(M):  # 适配超材料的标准为3*3 24*32
     Pattern9664 = np.tile(Pattern, 64)
 
     return Pattern9664
+
 # 3*4版本 模式1
 def Image2hex34TCP(M):  # 适配超材料的标准为3*3 24*32
     MM = np.copy(M.T)
+    MM = np.flip(MM, 1)
     MM[0:8, 0:8] = np.rot90(MM[0:8, 0:8], -1)
     MM[0:8, 8:16] = np.rot90(MM[0:8, 8:16], -1)
     MM[0:8, 16:24] = np.rot90(MM[0:8, 16:24], -1)
@@ -420,64 +423,52 @@ def Image2hex34TCPMod2(M):  # 适配超材料的标准为3*3 24*32
 if __name__ == "__main__":
 
     mod = 2
-    m_PRFdata = 1000000
+    m_PRFdata = 100
 
-    UnitNumY =  32
+    UnitNumY =  24
     UnitNum = 24
     tcp_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    tcp_socket.connect(("10.1.1.10", 7))
+    tcp_socket.connect(("10.1.1.11", 7))
     print("Tcp connection successful!")
     Smn_hat_tempt_stand_all_on = np.ones([UnitNumY, UnitNum])
     Smn_hat_tempt_stand_all_off = np.zeros([UnitNumY, UnitNum])
 
     UnitNum = 24
-    # com = 'COM5'
-    Location_Channel = np.array([0.0, 0, 2.684, 0.0, 0, 3])
+    Location_Channel = np.array([0.0, 0, 2.684, 1, 1, 1])
     # Engine1 = Communication(com, 115200, 0.5)
     MS = MetaSurface(Location_Channel, UnitNum)
-    MS.GetMatePattern34()
+    MS.GetMatePattern()
 
     a = 0
     try:
         if mod == 2:
-
             OnResetMod2(m_PRFdata, tcp_socket)
-            # while(1):
-            for ia in range(1,3):
+            for num in range(1,10):
                 start = time.time()
                 if a % 2 == 0:
-                    # print("Inputing Parameter...")
+                    print("Inputing Parameter...")
                     # Pattern_hex = Image2hex34TCPMod2((MS.Smn_hat + 1) / 2)
                     # Pattern_hex = Image2hex34TCPMod2(Smn_hat_tempt_stand_all_off)
-                    Smn_hat_tempt_stand_all_on[:, 1:24:2] = 0
-                    Pattern_hex = Image2hex34TCPMod2(Smn_hat_tempt_stand_all_on)
+                    # Smn_hat_tempt_stand_all_on[1:24:4, :] = 0
+                    # Pattern_hex = Image2hexTCPMod2((Smn_hat_tempt_stand_all_off))  # 一次性发送64个重复的pattern
+                    Pattern_hex = Image2hexTCPMod2((MS.Smn_hat ))   # 一次性发送64个重复的pattern
                     OnPatternMod2onTime(Pattern_hex, tcp_socket)
                     # OnParaMod2()
-                    # print("Input over")
-
-                    # print("Operating...")
-                    # time.sleep(0.009)  # 不知道为什么必须要加一个延时，否则发送的数据会出错。
-
-                    start = time.time()
+                    print("Input over")
                     recv_data = tcp_socket.recv(1024)
-                    print('receive on----------------------------------------', recv_data)
-                    print("receive took %.3f sec." % (time.time() - start))
-                    # time.sleep(1)
-                    # Onstart()
-                    # OnResetMod2()
-                    # print("Over")
-                    # time.sleep(5)
-                    # OnStop()
+                    print('receive on', recv_data)
                 else:
 
-                    # print("Inputing Parameter...")
+                    print("Inputing Parameter...")
                     # Pattern_hex = Image2hex34TCPMod2((MS.Smn_hat + 1) / 2)
                     # Pattern_hex = Image2hex34TCPMod2(Smn_hat_tempt_stand_all_off)
-                    Smn_hat_tempt_stand_all_off[:, 1:24:3] = 0
-                    Pattern_hex = Image2hex34TCPMod2(Smn_hat_tempt_stand_all_on)
+                    # Smn_hat_tempt_stand_all_off[10:14:1, 10:14:1] = 1
+                    # Smn_hat_tempt_stand_all_off[1:24:4, :] = 1
+                    # Pattern_hex = Image2hexTCPMod2((Smn_hat_tempt_stand_all_off))
+                    Pattern_hex = Image2hexTCPMod2((MS.Smn_hat ))
                     OnPatternMod2onTime(Pattern_hex, tcp_socket)
                     # OnPara()
-                    # print("Input over")
+                    print("Input over")
 
                     # print("Operating...")
                     # time.sleep(0.009)  # 不知道为什么必须要加一个延时，否则发送的数据会出错。
@@ -491,14 +482,14 @@ if __name__ == "__main__":
                     # OnStop()
                 a = a+1
                 print('a', a)
-                print("receive took took %.3f sec." % (time.time() - start))
-
+                print("top epoch took %.3f sec." % (time.time() - start))
+        # 模式二demo
         else:
             print("Reseting...")
             OnReset()
             print("Reset over")
 
-            # print("Inputing Parameter...")
+            print("Inputing Parameter...")
             # OnPara()  # 从文件
 
             Smn_hat_tempt_stand_all_on[:, 3:24:4] = 0
@@ -519,6 +510,7 @@ if __name__ == "__main__":
         tcp_socket.close()
 
     fig, ax = plt.subplots(1, 1)
+    # ax.pcolor(-MS.Smn_hat, cmap='jet', edgecolors='k', linewidths=0.4)
     ax.pcolor(-MS.Smn_hat, cmap='jet', edgecolors='k', linewidths=0.4)
     plt.show()
     """if __name__ == "__main__":

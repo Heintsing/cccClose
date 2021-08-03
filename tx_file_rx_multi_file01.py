@@ -11,8 +11,8 @@ import matplotlib.pyplot as plt
 
 global logger
 logger = logging.getLogger(__name__)
-INIT_DELAY = 0.01  # 50mS initial delay before transmit
-numm = 200
+INIT_DELAY = 0.1  # 50mS initial delay before transmit
+numm = 20
 
 def rx_multi_file(args, rx_streamer, md, stream_cmd, buffs, result, numm, timer_elapsed_event):
     if not timer_elapsed_event.is_set():
@@ -41,7 +41,7 @@ def rx_multi_file(args, rx_streamer, md, stream_cmd, buffs, result, numm, timer_
                     result[:, num_acc_samps:num_acc_samps + real_samps] = buffs[:, 0:real_samps]
                     num_acc_samps += real_samps
             # print("Rx samples:", num_acc_samps)
-            data.append(result)
+            data.append(result.copy())
             if num_acc_samps < args.total_num_samps:
                 print("Receive timeout before all samples received...")
 
@@ -194,15 +194,15 @@ usrp.set_rx_gain(args.rx_gain, args.rx_channel[0])
 usrp.set_rx_gain(args.rx_gain, args.rx_channel[1])
 print("ALMOST. Actual rx gain: {} ".format(usrp.get_rx_gain()))
 
-print("Requesting TX frequency of {} MHz...".format(args.freq / 1e6), end='')
+# print("Requesting TX frequency of {} MHz...".format(args.freq / 1e6), end='')
 tx_tune_request = uhd.types.TuneRequest(args.freq)
-if args.int_n:
-    tx_tune_request.args = uhd.types.DeviceAddr("mode_n=integer")
-usrp.set_tx_freq(tx_tune_request, args.tx_channel)
-if abs(usrp.get_tx_freq() - args.freq) > 1.0:
-    print("ALMOST. Actual frequency: {} MHz".format(usrp.get_tx_freq() / 1e6))
-else:
-    print("OK")
+# if args.int_n:
+#     tx_tune_request.args = uhd.types.DeviceAddr("mode_n=integer")
+# usrp.set_tx_freq(tx_tune_request, args.tx_channel)
+# if abs(usrp.get_tx_freq() - args.freq) > 1.0:
+#     print("ALMOST. Actual frequency: {} MHz".format(usrp.get_tx_freq() / 1e6))
+# else:
+#     print("OK")
 
 print("Requesting RX frequency of {} MHz...".format(args.freq / 1e6), end='')
 rx_tune_request = uhd.types.TuneRequest(args.freq)
@@ -213,6 +213,7 @@ cmd_time = usrp.get_time_now() + uhd.types.TimeSpec(0.1)
 usrp.set_command_time(cmd_time)
 usrp.set_rx_freq(rx_tune_request, args.rx_channel[0])
 usrp.set_rx_freq(rx_tune_request, args.rx_channel[1])
+usrp.set_tx_freq(tx_tune_request, args.tx_channel)
 usrp.clear_command_time()
 if abs(usrp.get_rx_freq() - args.freq) > 1.0:
     print("ALMOST. Actual frequency: {} MHz".format(usrp.get_rx_freq() / 1e6))

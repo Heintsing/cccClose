@@ -77,6 +77,7 @@ class MetaSurface(EmTxRx):
         #         signal[a, b] = signal_ab
         #
         # self.ABS_1bit_EMPlane = signalWithNoisePlane
+    # 可以自由设置长和高------------------------------------------
     def GetMatePattern34(self):
         # 超材料表面场值 EMonMateSurface
         X_matesurface = np.ones([1, self.UnitNumY]).T * (self.L_MetaUnit * np.arange(1, self.UnitNum + 1) - self.L_MetaUnit / 2) - self.L_MetaUnit * self.UnitNum / 2
