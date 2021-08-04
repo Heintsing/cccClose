@@ -12,27 +12,27 @@ import matplotlib.pyplot as plt
 global logger
 logger = logging.getLogger(__name__)
 INIT_DELAY = 0.01  # 50mS initial delay before transmit
-numm = 200
+numm = 10
+a = 0
 # time_now = 0 #usrp.get_time_now().get_real_secs()
 
 def rx_multi_file(args, rx_streamer, md, stream_cmd, buffs, result, numm, timer_elapsed_event):
     # global time_now
     global INIT_DELAY
-    start1 = time.time()
-
-    if not timer_elapsed_event.is_set():
+    global a
+    while 1:
         data = []
-        for i in range(numm):
+        # for i in range(numm):
+        if timer_elapsed_event.is_set():
+            # print("Rx time:", time.time())
+            print('a',a)
 
-
-            # time_now = usrp.get_time_now().get_real_secs()
-            # stream_cmd.time_spec = uhd.types.TimeSpec(time_now + INIT_DELAY) # uhd.types.TimeSpec(INIT_DELAY * (i+1))
-            stream_cmd.time_spec = uhd.types.TimeSpec(INIT_DELAY * (i+1)+0.01)
-            # print('rx', usrp.get_time_now().get_real_secs())
-            # print('rx--', time_now)
-            # tells all channels to stream
             time_now = usrp.get_time_now().get_real_secs()
+            stream_cmd.time_spec = uhd.types.TimeSpec(time_now + INIT_DELAY) # uhd.types.TimeSpec(INIT_DELAY * (i+1))
+            # stream_cmd.time_spec = uhd.types.TimeSpec(INIT_DELAY * (i+1))
+            # print('rx', usrp.get_time_now().get_real_secs())
             print('rx--', time_now)
+            # tells all channels to stream
             rx_streamer.issue_stream_cmd(stream_cmd)
 
             # the first call to recv() will block this many seconds before receiving
@@ -56,37 +56,34 @@ def rx_multi_file(args, rx_streamer, md, stream_cmd, buffs, result, numm, timer_
             data.append(result.copy())
             if num_acc_samps < args.total_num_samps:
                 print("Receive timeout before all samples received...")
-
-        data = np.array(data)
-        with open(args.output_file, 'wb') as out_file:
-            if args.numpy:
-                np.save(out_file, data, allow_pickle=False, fix_imports=False)
-            else:
-                data.tofile(out_file)
-    print("rx thread took %.3f sec." % (time.time() - start1))
+            timer_elapsed_event.clear()
+            if a==numm:
+                data = np.array(data)
+                with open(args.output_file, 'wb') as out_file:
+                    if args.numpy:
+                        np.save(out_file, data, allow_pickle=False, fix_imports=False)
+                        print('save')
+                    else:
+                        data.tofile(out_file)
+                timer_elapsed_event.clear()
 
 def tx_from_file(args, tx_streamer, mdtx, tx_buff, numm, timer_elapsed_event):
     # global time_now
     global INIT_DELAY
-    start2 = time.time()
-    if not timer_elapsed_event.is_set():
-        print("Tx time:", time.time())
+    global a
+    while 1:
         # timer_elapsed_event.wait()
-
-        for i in range(numm):
-
+        if timer_elapsed_event.is_set():
+            # print("Tx time:", time.time())
             mdtx.start_of_burst = True
             mdtx.end_of_burst = False
             mdtx.has_time_spec = True
-            mdtx.time_spec = uhd.types.TimeSpec(INIT_DELAY * (i+1)+0.01)# (time_now + INIT_DELAY)#
-
-            # time_now = usrp.get_time_now().get_real_secs()
-            # mdtx.time_spec = uhd.types.TimeSpec(time_now + INIT_DELAY)#
-            # print('tx', usrp.get_time_now().get_real_secs())
-            # print('tx', time_now)
-            send_samps = 0
+            # mdtx.time_spec = uhd.types.TimeSpec(INIT_DELAY * (i+1))# (time_now + INIT_DELAY)#
             time_now = usrp.get_time_now().get_real_secs()
+            mdtx.time_spec = uhd.types.TimeSpec(time_now + INIT_DELAY)#
+            # print('tx', usrp.get_time_now().get_real_secs())
             print('tx', time_now)
+            send_samps = 0
             while send_samps < args.total_num_samps:
                 samples = tx_streamer.send(tx_buff, mdtx)
                 send_samps += samples
@@ -95,7 +92,8 @@ def tx_from_file(args, tx_streamer, mdtx, tx_buff, numm, timer_elapsed_event):
             # print("Tx samples:", send_samps)
             mdtx.end_of_burst = True
             tx_streamer.send(np.zeros((1, 0), dtype=np.complex64), mdtx)
-    print("tx thread took %.3f sec." % (time.time() - start2))
+            timer_elapsed_event.clear()
+
 def load_from_file(filename, samps_per_buff):
     data = scio.loadmat(filename)
     buff_t = data['LFMs']
@@ -150,7 +148,7 @@ def parse_args():
                         help="Transmit power (if USRP supports it)")
     parser.add_argument("--ref", type=str, default='internal',
                         help="reference source (internal, external, mimo).")
-    parser.add_argument("--bw", default=100000000, type=float,
+    parser.add_argument("--bw", default=10000000, type=float,
                         help="analog frontend filter bandwidth in Hz")
     parser.add_argument("--wirefmt", type=str, default='sc16',
                         help="wire format (sc8 or sc16)")
@@ -339,38 +337,34 @@ if args.rate:
     # mdtx.has_time_spec = True
     # mdtx.time_spec = uhd.types.TimeSpec(usrp.get_time_now().get_real_secs() + INIT_DELAY)
 
-
+    threads = []
     # for i in range(3):
     # Make a signal for the threads to stop running
     quit_event = threading.Event()
     quit_event.clear()
-
-    threads = []
     rx_thread = threading.Thread(target=rx_multi_file,
                              args=(args, rx_streamer, md, stream_cmd, buffs, result, numm, quit_event))
     threads.append(rx_thread)
-    # 主线程在其他非守护线程运行完毕后才算运行完毕(守护线程在此时就被回收)
-    rx_thread.setDaemon(True) # 设置子线程为守护线程时
-
+    rx_thread.setDaemon(True)
+    rx_thread.start()
     # rx_thread.setName("rx_stream")
 
     tx_thread = threading.Thread(target=tx_from_file,
                                  args=(args, tx_streamer, mdtx, tx_buff, numm, quit_event))
     threads.append(tx_thread)
-    tx_thread.setDaemon(True) # 主线程执行完自己的任务以后，子进程立刻退出
-
-    rx_thread.start()
+    tx_thread.setDaemon(True)
     tx_thread.start()
-
-
     # tx_thread.setName("tx_stream")
-    # quit_event.set() # 本意是用来使进程结束
+    a = 1
+    for i in range(1,11):
+        quit_event.set()
+        time.sleep(0.1)
+        a = a+1
 
     # Interrupt and join the threads
     logger.debug("Sending signal to stop!")
-    for thr in threads: # 等一个子线程运行完了才继续执行此线程（主线程）
-        thr.join()  # 即主线程任务结束之后，进入阻塞状态，一直等待其他的子线程执行结束之后，主线程在终止 https://www.cnblogs.com/cnkai/p/7504980.html
-
+    for thr in threads:
+        thr.join()
 
 
 

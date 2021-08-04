@@ -220,11 +220,11 @@ Pattern_up = Engine1.Image2hex(Smn_hat_up)
 Pattern_stand = Engine2.Image2hex34(Smn_hat_stand)
 Bit_up = Engine1.MetaDeployMultiPattern(Pattern_up, 0)
 Bit_stand = Engine1.MetaDeployMultiPattern(Pattern_stand, 0)
-fo = open("2424联合在线优化编码_10210727位置1.txt", "wb")
+fo = open(r"C:\Users\admin\Desktop\CCC_laptop\CCCans\2424联合在线优化编码_10210727位置1.txt", "wb")
 print("文件名为: ", fo.name)
 str = "菜鸟教程"
 fo.write(Bit_up)
-fo = open("3224联合在线优化编码_10210727位置1.txt", "wb")
+fo = open(r"C:\Users\admin\Desktop\CCC_laptop\CCCans\3224联合在线优化编码_10210727位置1.txt", "wb")
 print("文件名为: ", fo.name)
 str = "菜鸟教程"
 fo.write(Bit_stand)
@@ -233,6 +233,10 @@ print("文件名为: ", fo.name)
 str = "菜鸟教程"
 fo.write(Location_Channel)
 fo.write(Location_Channel_up)
+
+np.savetxt(r"C:\Users\admin\Desktop\CCC_laptop\CCCans\location.csv", [Location_Channel, Location_Channel_up], delimiter = ',')
+print([Location_Channel, Location_Channel_up])
+
 
 fig, ax = plt.subplots(2, 3)
 # 设置字体为楷体

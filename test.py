@@ -101,7 +101,7 @@ print("文件名为: ", fo.name)
 strr = "菜鸟教程"
 fo.write(str(Location_Channel).encode("utf-8"))
 fo.write(str(Location_Channel_up).encode("utf-8"))
-np.savetxt('new.csv', [Location_Channel, Location_Channel_up], delimiter = ',')
+np.savetxt(r"C:\Users\admin\Desktop\CCC_laptop\CCCans\new.csv", [Location_Channel, Location_Channel_up], delimiter = ',')
 print([Location_Channel, Location_Channel_up])
 # np.savetxt('new.csv', Location_Channel_up, delimiter = ',')
 

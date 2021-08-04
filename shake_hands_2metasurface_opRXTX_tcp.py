@@ -28,9 +28,13 @@ UnitNumY = 32
 n_switch = 1000
 m_PRFdata = 100
 noise_threshold = 4
+com1 = 'COM1'  # 天花板
 
 # 初始化各个模块-----------------------
 usrp, streamer, args, chan = SetUsrp()
+# Communication.Print_Used_Com()
+Engine1 = Communication(com1, 115200, 0.5)
+Engine1.Print_Name()
 # 动捕系统初始化
 print("Begin to init the SDK Client")
 ret = Initialize(b"10.1.1.198", b"10.1.1.198")
@@ -264,23 +268,23 @@ PatternSavePath = r"C:\Users\admin\Desktop\CCC_laptop\CCCans\PowerPath_static.ma
 scio.savemat(PatternSavePath, {'PowerPath_static': PowerPath_static})
 
 # 保存编码供串口发送
-# Pattern_up = Engine1.Image2hex(Smn_hat_up)
-# Pattern_stand = Image2hex34TCPMod2(Smn_hat_stand)
-# Bit_up = Engine1.MetaDeployMultiPattern(Pattern_up, 0)
-# Bit_stand = Engine1.MetaDeployMultiPattern(Pattern_stand, 0)
-# fo = open("2424联合在线优化编码_10210727位置1.txt", "wb")
-# print("文件名为: ", fo.name)
-# str = "菜鸟教程"
-# fo.write(Bit_up)
-# fo = open("3224联合在线优化编码_10210727位置1.txt", "wb")
-# print("文件名为: ", fo.name)
-# str = "菜鸟教程"
-# fo.write(Bit_stand)
-# fo = open("位置信息", "wb")
-# print("文件名为: ", fo.name)
-# str = "菜鸟教程"
-# fo.write(Location_Channel)
-# fo.write(Location_Channel_up)
+Pattern_up = Engine1.Image2hex(Smn_hat_up)
+Pattern_stand = Engine1.Image2hex34(Smn_hat_stand)
+Bit_up = Engine1.MetaDeployMultiPattern(Pattern_up, 0)
+Bit_stand = Engine1.MetaDeployMultiPattern(Pattern_stand, 0)
+fo = open("2424联合在线优化编码_10210727位置1.txt", "wb")
+print("文件名为: ", fo.name)
+str = "菜鸟教程"
+fo.write(Bit_up)
+fo = open("3224联合在线优化编码_10210727位置1.txt", "wb")
+print("文件名为: ", fo.name)
+str = "菜鸟教程"
+fo.write(Bit_stand)
+fo = open("位置信息", "wb")
+print("文件名为: ", fo.name)
+str = "菜鸟教程"
+fo.write(Location_Channel)
+fo.write(Location_Channel_up)
 
 np.savetxt('new.csv', [Location_Channel, Location_Channel_up], delimiter = ',')
 print([Location_Channel, Location_Channel_up])
