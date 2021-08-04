@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt
 
 global logger
 logger = logging.getLogger(__name__)
-INIT_DELAY = 0.01  # 50mS initial delay before transmit
+INIT_DELAY = 0.003  # 50mS initial delay before transmit
 numm = 10
 a = 0
 # time_now = 0 #usrp.get_time_now().get_real_secs()
@@ -316,7 +316,7 @@ if args.rate:
     md = uhd.types.RXMetadata()
 
     # setup streaming
-    stream_cmd = uhd.types.StreamCMD(uhd.types.StreamMode.num_done)
+    stream_cmd = uhd.types.StreamCMD(uhd.types.StreamMode.num_more)
     stream_cmd.num_samps = args.total_num_samps
     stream_cmd.stream_now = False
     # stream_cmd.time_spec = uhd.types.TimeSpec(usrp.get_time_now().get_real_secs() + INIT_DELAY)

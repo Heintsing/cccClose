@@ -11,8 +11,9 @@ import matplotlib.pyplot as plt
 
 global logger
 logger = logging.getLogger(__name__)
-INIT_DELAY = 0.01  # 50mS initial delay before transmit
-numm = 200
+INIT_DELAY = 0.003  # 50mS initial delay before transmit
+numm = 10
+thread_start_delay_time = 0.2 # 时间对齐
 # time_now = 0 #usrp.get_time_now().get_real_secs()
 
 def rx_multi_file(args, rx_streamer, md, stream_cmd, buffs, result, numm, timer_elapsed_event):
@@ -20,20 +21,26 @@ def rx_multi_file(args, rx_streamer, md, stream_cmd, buffs, result, numm, timer_
     global INIT_DELAY
     start1 = time.time()
 
-    if not timer_elapsed_event.is_set():
+
+    if 1:
         data = []
+        # time_now = usrp.get_time_now().get_real_secs()
+        # print('rx--', time_now)
         for i in range(numm):
 
 
             # time_now = usrp.get_time_now().get_real_secs()
             # stream_cmd.time_spec = uhd.types.TimeSpec(time_now + INIT_DELAY) # uhd.types.TimeSpec(INIT_DELAY * (i+1))
-            stream_cmd.time_spec = uhd.types.TimeSpec(INIT_DELAY * (i+1)+0.01)
+            stream_cmd.time_spec = uhd.types.TimeSpec(INIT_DELAY * (i+1)+thread_start_delay_time)
             # print('rx', usrp.get_time_now().get_real_secs())
             # print('rx--', time_now)
             # tells all channels to stream
             time_now = usrp.get_time_now().get_real_secs()
             print('rx--', time_now)
             rx_streamer.issue_stream_cmd(stream_cmd)
+            # if i==1:
+            #     time_now = usrp.get_time_now().get_real_secs()
+            #     print('rx--', time_now)
 
             # the first call to recv() will block this many seconds before receiving
             # number of accumulated samples
@@ -68,9 +75,9 @@ def rx_multi_file(args, rx_streamer, md, stream_cmd, buffs, result, numm, timer_
 def tx_from_file(args, tx_streamer, mdtx, tx_buff, numm, timer_elapsed_event):
     # global time_now
     global INIT_DELAY
-    start2 = time.time()
-    if not timer_elapsed_event.is_set():
-        print("Tx time:", time.time())
+    # start2 = time.time()
+    if 1:
+        # print("Tx time:", time.time())
         # timer_elapsed_event.wait()
 
         for i in range(numm):
@@ -78,15 +85,15 @@ def tx_from_file(args, tx_streamer, mdtx, tx_buff, numm, timer_elapsed_event):
             mdtx.start_of_burst = True
             mdtx.end_of_burst = False
             mdtx.has_time_spec = True
-            mdtx.time_spec = uhd.types.TimeSpec(INIT_DELAY * (i+1)+0.01)# (time_now + INIT_DELAY)#
+            mdtx.time_spec = uhd.types.TimeSpec(INIT_DELAY * (i+1)+thread_start_delay_time)# (time_now + INIT_DELAY)#
 
             # time_now = usrp.get_time_now().get_real_secs()
             # mdtx.time_spec = uhd.types.TimeSpec(time_now + INIT_DELAY)#
             # print('tx', usrp.get_time_now().get_real_secs())
             # print('tx', time_now)
             send_samps = 0
-            time_now = usrp.get_time_now().get_real_secs()
-            print('tx', time_now)
+            # time_now = usrp.get_time_now().get_real_secs()
+            # print('tx', time_now)
             while send_samps < args.total_num_samps:
                 samples = tx_streamer.send(tx_buff, mdtx)
                 send_samps += samples
@@ -95,7 +102,7 @@ def tx_from_file(args, tx_streamer, mdtx, tx_buff, numm, timer_elapsed_event):
             # print("Tx samples:", send_samps)
             mdtx.end_of_burst = True
             tx_streamer.send(np.zeros((1, 0), dtype=np.complex64), mdtx)
-    print("tx thread took %.3f sec." % (time.time() - start2))
+    # print("tx thread took %.3f sec." % (time.time() - start2))
 def load_from_file(filename, samps_per_buff):
     data = scio.loadmat(filename)
     buff_t = data['LFMs']
@@ -318,7 +325,7 @@ if args.rate:
     md = uhd.types.RXMetadata()
 
     # setup streaming
-    stream_cmd = uhd.types.StreamCMD(uhd.types.StreamMode.num_done)
+    stream_cmd = uhd.types.StreamCMD(uhd.types.StreamMode.num_more)
     stream_cmd.num_samps = args.total_num_samps
     stream_cmd.stream_now = False
     # stream_cmd.time_spec = uhd.types.TimeSpec(usrp.get_time_now().get_real_secs() + INIT_DELAY)
@@ -345,34 +352,66 @@ if args.rate:
     quit_event = threading.Event()
     quit_event.clear()
 
+    # --------------------------------------- 单次收发
+    # threads = []
+    # rx_thread = threading.Thread(target=rx_multi_file,
+    #                          args=(args, rx_streamer, md, stream_cmd, buffs, result, numm, quit_event))
+    # threads.append(rx_thread)
+    # # 主线程在其他非守护线程运行完毕后才算运行完毕(守护线程在此时就被回收)
+    # rx_thread.setDaemon(True) # 设置子线程为守护线程时
+    #
+    # # rx_thread.setName("rx_stream")
+    #
+    # tx_thread = threading.Thread(target=tx_from_file,
+    #                              args=(args, tx_streamer, mdtx, tx_buff, numm, quit_event))
+    # threads.append(tx_thread)
+    # tx_thread.setDaemon(True) # 主线程执行完自己的任务以后，子进程立刻退出
+    #
+    # rx_thread.start()
+    # tx_thread.start()
+    #
+    #
+    # # tx_thread.setName("tx_stream")
+    # # quit_event.set() # 本意是用来使进程结束
+    #
+    # # Interrupt and join the threads
+    # logger.debug("Sending signal to stop!")
+    # for thr in threads: # 等一个子线程运行完了才继续执行此线程（主线程）
+    #     thr.join()  # 即主线程任务结束之后，进入阻塞状态，一直等待其他的子线程执行结束之后，主线程在终止 https://www.cnblogs.com/cnkai/p/7504980.html
+
+    # --------------------------------------- 多线程循环
+    num_showtime = 5
     threads = []
-    rx_thread = threading.Thread(target=rx_multi_file,
-                             args=(args, rx_streamer, md, stream_cmd, buffs, result, numm, quit_event))
-    threads.append(rx_thread)
-    # 主线程在其他非守护线程运行完毕后才算运行完毕(守护线程在此时就被回收)
-    rx_thread.setDaemon(True) # 设置子线程为守护线程时
+    for i_thread in range(0,num_showtime): # 等一个子线程运行完了才继续执行此线程（主线程）
+        rx_thread = threading.Thread(target=rx_multi_file,args=(args, rx_streamer, md, stream_cmd, buffs, result, numm, quit_event))
+        rx_thread.setDaemon(True)  # 设置子线程为守护线程时
+        threads.append(rx_thread)
 
-    # rx_thread.setName("rx_stream")
+        tx_thread = threading.Thread(target=tx_from_file,args=(args, tx_streamer, mdtx, tx_buff, numm, quit_event))
+        threads.append(tx_thread)
+        tx_thread.setDaemon(True)  # 主线程执行完自己的任务以后，子进程立刻退出
+    delay = 0
+    for i_thread in range(0,num_showtime):  # 等一个子线程运行完了才继续执行此线程（主线程）
+        print('echo ', i_thread)
+        threads[i_thread*2].start()
+        threads[i_thread*2+1].start()
+        threads[i_thread*2].join()
+        threads[i_thread*2+1].join()
+        time.sleep(1)
 
-    tx_thread = threading.Thread(target=tx_from_file,
-                                 args=(args, tx_streamer, mdtx, tx_buff, numm, quit_event))
-    threads.append(tx_thread)
-    tx_thread.setDaemon(True) # 主线程执行完自己的任务以后，子进程立刻退出
-
-    rx_thread.start()
-    tx_thread.start()
-
-
-    # tx_thread.setName("tx_stream")
-    # quit_event.set() # 本意是用来使进程结束
-
-    # Interrupt and join the threads
-    logger.debug("Sending signal to stop!")
-    for thr in threads: # 等一个子线程运行完了才继续执行此线程（主线程）
-        thr.join()  # 即主线程任务结束之后，进入阻塞状态，一直等待其他的子线程执行结束之后，主线程在终止 https://www.cnblogs.com/cnkai/p/7504980.html
+        usrp.set_time_now(uhd.types.TimeSpec(0.0))
+    # logger.debug("Sending signal to stop!")
+    # for thr in threads: # 等一个子线程运行完了才继续执行此线程（主线程）
+    #     thr.join()  # 即主线程任务结束之后，进入阻塞状态，一直等待其他的子线程执行结束之后，主线程在终止 https://www.cnblogs.com/cnkai/p/7504980.html
 
 
 
+    # tx_threadd = threading.Thread(target=tx_from_file,
+    #                              args=(args, tx_streamer, mdtx, tx_buff, numm, quit_event))
+    # threads.append(tx_threadd)
+    # tx_threadd.setDaemon(True)  # 主线程执行完自己的任务以后，子进程立刻退出
+    # tx_threadd.start()
+    # tx_threadd.join()
 
 
 ##############
