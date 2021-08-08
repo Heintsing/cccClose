@@ -7,14 +7,14 @@ import numpy as np
 import logging
 import threading
 import scipy.io as scio
-from AnnHandsPredict import SMnistModel
+# from AnnHandsPredict import SMnistModel
 import matplotlib.pyplot as plt
 
 global logger
 logger = logging.getLogger(__name__)
-INIT_DELAY = 0.01  # 50mS initial delay before transmit
+INIT_DELAY = 0.002  # 50mS initial delay before transmit
 numm = 27
-thread_start_delay_time = 0.005  # 时间对齐,留出发送指令和（第一次线程运行的0.01ms)
+thread_start_delay_time = 0.01  # 时间对齐,留出发送指令和（第一次线程运行的0.01ms)
 data = []
 
 
@@ -177,7 +177,7 @@ def parse_args():
                         help="wire format (sc8 or sc16)")
     parser.add_argument("--cpu", type=str, default="fc32",
                         help="specify the host/cpu sample mode for TX")
-    parser.add_argument("-o", "--output-file", type=str, default=r'C:\Users\admin\Desktop\CCC_laptop\Pycode\test\out')
+    parser.add_argument("-o", "--output-file", type=str, default=r'F:\zht\CCC\cccClose\test\out')
     parser.add_argument("-n", "--numpy", default=False, action="store_true",
                         help="Save output file in NumPy format (default: No)")
     parser.add_argument("--seconds_in_future", type=float, default=1.5,
@@ -321,7 +321,7 @@ if __name__ == "__main__":
         time.sleep(0.1)
     print("Are the times across all motherboards synchronized: ", usrp.get_time_synchronized())
 
-    filename = r'C:\Users\admin\Desktop\CCC_laptop\Pycode\LFMs1000.mat'
+    filename = r'F:\zht\CCC\cccClose\LFMs1000.mat'
     tx_buff = load_from_file(filename, args.total_num_samps)
 
     # tx_buff = np.array(
@@ -366,9 +366,9 @@ if __name__ == "__main__":
         quit_event.clear()
 
         # --------------------------------------- 多线程循环
-        num_showtime = 2000
+        num_showtime = 232*8
         threads = []
-        model = SMnistModel(model_size=32)
+        # model = SMnistModel(model_size=32)
 
         for i_thread in range(0, num_showtime):  # 等一个子线程运行完了才继续执行此线程（主线程）
             rx_thread = threading.Thread(target=rx_multi_file, args=(args, rx_streamer, md, stream_cmd, buffs, result, numm, quit_event))
@@ -392,14 +392,15 @@ if __name__ == "__main__":
             threads[i_thread * 2].join()
             threads[i_thread * 2 + 1].join()
             data_np = np.array(data)
-            data_200[25 * (i_thread % 8):25 * (i_thread % 8 + 1), :, :] = data_np[2:27, :, :]
+            if i_thread >= 32:
+                data_200[25 * (i_thread % 8):25 * (i_thread % 8 + 1), :, :] = data_np[2:27, :, :]
             if i_thread % 8 == 0 and i_thread != 0:
                 # print(data_200.shape)
                 occ_data1 = data_200[:, 0, :].T  # 1000*200 复数
                 occ_data2 = data_200[:, 1, :].T  # 1000*200 复数
-                occ_data = model.zgnb(occ_data1, occ_data2)  # 相关性处理
-                re = model.test(occ_data)
-                print('\033[41;1m predict is %d \033[0m' %re)
+                # occ_data = model.zgnb(occ_data1, occ_data2)  # 相关性处理
+                # re = model.test(occ_data)
+                # print('\033[41;1m predict is %d \033[0m' %re)
                 print("200_echo took %.3f sec." % (time.time() - start_echo))
                 start_echo = time.time()
                 data_200 = data_200.astype(np.complex64)

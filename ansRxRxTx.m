@@ -1,5 +1,5 @@
 clear;close all
-path = 'C:\Users\admin\Desktop\CCC_laptop\Pycode';
+path = 'F:\zht\CCC\cccClose';
 cd(path)
 
 name = ('out.fc32');
