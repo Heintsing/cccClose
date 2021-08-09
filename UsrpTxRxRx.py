@@ -21,6 +21,7 @@ data = []
 def rx_multi_file(args, rx_streamer, md, stream_cmd, buffs, result, numm, timer_elapsed_event):
     # global time_now
     global INIT_DELAY
+    global thread_start_delay_time
     # start1 = time.time()
     if 1:
         global data
@@ -31,6 +32,8 @@ def rx_multi_file(args, rx_streamer, md, stream_cmd, buffs, result, numm, timer_
         for i in range(numm + 1):
             stream_cmd.time_spec = uhd.types.TimeSpec(INIT_DELAY * (i + 1) + thread_start_delay_time)
             rx_streamer.issue_stream_cmd(stream_cmd)
+            # time_now = usrp.get_time_now().get_real_secs()
+            # print('rx cmd finish--', time_now,'---numCMD----',i)
         # time_now = usrp.get_time_now().get_real_secs()
         # print('rx cmd finish--', time_now)
         for i in range(numm):
@@ -42,7 +45,7 @@ def rx_multi_file(args, rx_streamer, md, stream_cmd, buffs, result, numm, timer_
             # print('rx--', time_now)
             # tells all channels to stream
             # time_now = usrp.get_time_now().get_real_secs()
-            # print('rx--', time_now)
+            # print('rx--', time_now,'i == ',i)
             # if i==0:
             #     time.sleep(0.01)
             # rx_streamer.issue_stream_cmd(stream_cmd)
@@ -57,11 +60,12 @@ def rx_multi_file(args, rx_streamer, md, stream_cmd, buffs, result, numm, timer_
 
             while num_acc_samps < args.total_num_samps:
                 # receive a single packet
-                num_rx_samps = rx_streamer.recv(buffs, md)
+                num_rx_samps = rx_streamer.recv(buffs, md, 1)
                 # handle the error code
                 if md.error_code == uhd.types.RXMetadataErrorCode.timeout:
                     break
                 if md.error_code != uhd.types.RXMetadataErrorCode.none:
+                    # print('receive error',i)
                     raise ValueError("Receiver error %s" % md.strerror())
                 if num_rx_samps:
                     real_samps = min(args.total_num_samps - num_acc_samps, num_rx_samps)
@@ -70,6 +74,7 @@ def rx_multi_file(args, rx_streamer, md, stream_cmd, buffs, result, numm, timer_
             # print("Rx samples:", num_acc_samps)
             data.append(result.copy())
             if num_acc_samps < args.total_num_samps:
+                # print('i == ',i)
                 print("Receive timeout before all samples received...")
         # print("rx thread took %.3f sec." % (time.time() - start1))
 
@@ -94,7 +99,7 @@ def tx_from_file(args, tx_streamer, mdtx, tx_buff, numm, timer_elapsed_event):
             mdtx.start_of_burst = True
             mdtx.end_of_burst = True
             mdtx.has_time_spec = True
-            mdtx.time_spec = uhd.types.TimeSpec(INIT_DELAY * (i + 1) + thread_start_delay_time)  # (time_now + INIT_DELAY)#
+            mdtx.time_spec = uhd.types.TimeSpec(INIT_DELAY * (i + 1) + thread_start_delay_time-0.0000025)  # (time_now + INIT_DELAY)#
 
             # time_now = usrp.get_time_now().get_real_secs()
             # mdtx.time_spec = uhd.types.TimeSpec(time_now + INIT_DELAY)#
@@ -155,8 +160,8 @@ def parse_args():
                         help="total number of samples to receive/transmit.")
     parser.add_argument("--tx_antenna", default='TX/RX', help="USRP TX Antenna")
     parser.add_argument("--rx_antenna", default='RX2', help="USRP RX Antenna")
-    parser.add_argument("--tx_gain", type=int, default=23)
-    parser.add_argument("--rx_gain", type=int, default=23)
+    parser.add_argument("--tx_gain", type=int, default=20)
+    parser.add_argument("--rx_gain", type=int, default=10)
     parser.add_argument("--rx_sync", type=str, default='now',
                         help="synchronization method: now, pps, mimo.")
     parser.add_argument("--tx_subdev", type=str, default='A:0',
@@ -177,7 +182,7 @@ def parse_args():
                         help="wire format (sc8 or sc16)")
     parser.add_argument("--cpu", type=str, default="fc32",
                         help="specify the host/cpu sample mode for TX")
-    parser.add_argument("-o", "--output-file", type=str, default=r'F:\zht\CCC\cccClose\test\out')
+    parser.add_argument("-o", "--output-file", type=str, default=r'F:\zht\CCC\CCCcloseData\Python-close-test\out')
     parser.add_argument("-n", "--numpy", default=False, action="store_true",
                         help="Save output file in NumPy format (default: No)")
     parser.add_argument("--seconds_in_future", type=float, default=1.5,
@@ -366,7 +371,7 @@ if __name__ == "__main__":
         quit_event.clear()
 
         # --------------------------------------- 多线程循环
-        num_showtime = 232*8
+        num_showtime =  50*8
         threads = []
         # model = SMnistModel(model_size=32)
 
@@ -386,13 +391,13 @@ if __name__ == "__main__":
 
         for i_thread in range(0, num_showtime):  # 等一个子线程运行完了才继续执行此线程（主线程）
             usrp.set_time_now(uhd.types.TimeSpec(0.0))
-            # print('echo ', i_thread)
+            # print('echo -------------------------------------------', i_thread)
             threads[i_thread * 2].start()
             threads[i_thread * 2 + 1].start()
             threads[i_thread * 2].join()
             threads[i_thread * 2 + 1].join()
             data_np = np.array(data)
-            if i_thread >= 32:
+            if i_thread >= 4: # 32
                 data_200[25 * (i_thread % 8):25 * (i_thread % 8 + 1), :, :] = data_np[2:27, :, :]
             if i_thread % 8 == 0 and i_thread != 0:
                 # print(data_200.shape)
@@ -401,7 +406,7 @@ if __name__ == "__main__":
                 # occ_data = model.zgnb(occ_data1, occ_data2)  # 相关性处理
                 # re = model.test(occ_data)
                 # print('\033[41;1m predict is %d \033[0m' %re)
-                print("200_echo took %.3f sec." % (time.time() - start_echo))
+                print("200_echo took %.3f sec." % (time.time() - start_echo),'num==', i_thread / 8)
                 start_echo = time.time()
                 data_200 = data_200.astype(np.complex64)
                 with open(args.output_file+str(data_200_num)+'.fc32', 'wb') as out_file:
